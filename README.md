@@ -16,6 +16,10 @@ https://github.com/gaycoderprincess/SDHDOneHitKO/assets/163012979/1c51829e-f6b4-
 - Small tweaks added to fix certain impossible missions (curse you, grapple system!)
 - Options to switch between a full health display, an upgraded health display, and showing zero health with the red screen overlay
 
+## Known problems
+
+- There seems to be unavoidable damage in the mission Meet the New Boss, making it impossible to survive opening the door
+
 ## Building
 
 Building is done on an Arch Linux system with CLion and vcpkg being used for the build process. 
