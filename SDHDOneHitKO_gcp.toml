@@ -1,0 +1,6 @@
+# Sleeping Dogs One-Hit-KO by Hana @gaycoderprincess
+# enjoy, nya~ :3
+
+[main]
+no_idle_grapple_damage = true		# Disables idle damage from being grappled, required for some missions to be passable!
+health_display_mode = 0			# Health HUD state, doesn't affect gameplay (0 - no health, 1 - full health, 2 - full upgraded health)
