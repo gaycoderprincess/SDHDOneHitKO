@@ -11,6 +11,8 @@ enum eHealthDisplayMode {
 	HEALTH_DISPLAY_UPGRADED,
 };
 int nHealthDisplayMode = HEALTH_DISPLAY_ZERO;
+bool bNoIdleGrappleDamage = true;
+bool bNoPopstarLead1TackleDamage = true;
 
 void RunOHKO() {
 	auto pPlayer = UFG::GetLocalPlayer();
@@ -41,19 +43,27 @@ bool UpdateGameSystemsPatch(float delta_time) {
 	return UpdateGameSystems_RetAddress(delta_time);
 }
 
-// discard idle damage from grappling, it's 5hp per second or so
-// doing this since multiple missions force you into being grappled and it just results in an instant fail screen
-// there's gotta be a better way to do this, but looking at the track/task/actioncontroller system makes me wanna pull my hair out >.<
 bool ShouldDamageBeDiscarded(UFG::HealthComponent* pThis, const int iDamage, bool bProjectileDamage) {
 	if (bProjectileDamage) return false;
-	if (iDamage != 5) return false;
 
 	auto pPlayer = UFG::GetLocalPlayer();
 	if (!pPlayer) return false;
 	auto pHealth = UFG::FindComponentOfType<UFG::HealthComponent>(pPlayer);
 	if (!pHealth) return false;
 	if (pHealth != pThis) return false;
-	return true;
+
+	// discard idle damage from grappling, it's 5hp per second or so
+	// doing this since multiple missions force you into being grappled and it just results in an instant fail screen
+	// there's gotta be a better way to do this, but looking at the track/task/actioncontroller system makes me wanna pull my hair out >.<
+	if (iDamage == 5 && bNoIdleGrappleDamage) return true;
+
+	// unavoidable 50 damage when getting tackled by a cop in Popstar Lead 1
+	if (iDamage == 50 && bNoPopstarLead1TackleDamage) {
+		UFG::qVector3 playerPos = {0,0,0};
+		UFG::GetPosition(&playerPos, pPlayer);
+		if (playerPos.x > 1140 && playerPos.x < 1150 && playerPos.y > 160 && playerPos.y < 180) return true;
+	}
+	return false;
 }
 
 auto ApplyHealthDamagePatch_RetAddress = (bool(__fastcall*)(UFG::HealthComponent*, const int, UFG::SimObject*, void*, bool))(module + 0x5221C0);
@@ -77,13 +87,14 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {
 			}
 
 			auto config = toml::parse_file("SDHDOneHitKO_gcp.toml");
-			bool bNoIdleGrappleDamage = config["main"]["no_idle_grapple_damage"].value_or(true);
+			bNoIdleGrappleDamage = config["main"]["no_idle_grapple_damage"].value_or(true);
+			bNoPopstarLead1TackleDamage = config["main"]["no_cop_tackle_damage"].value_or(true);
 			nHealthDisplayMode = config["main"]["health_display_mode"].value_or(HEALTH_DISPLAY_ZERO);
 
 			UpdateGameSystems_RetAddress = (bool (__fastcall*)(float)) NyaHookLib::ReadRelative(module + 0xA401D2 + 1);
 			NyaHookLib::PatchRelative(NyaHookLib::CALL, module + 0xA401D2, &UpdateGameSystemsPatch);
 
-			if (bNoIdleGrappleDamage) {
+			if (bNoIdleGrappleDamage || bNoPopstarLead1TackleDamage) {
 				ApplyHealthDamagePatch_RetAddress = (bool (__fastcall *)(UFG::HealthComponent *, const int,
 																		 UFG::SimObject *, void *,
 																		 bool)) NyaHookLib::ReadRelative(

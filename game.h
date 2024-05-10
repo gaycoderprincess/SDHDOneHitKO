@@ -25,6 +25,13 @@ namespace UFG {
 		static inline auto& ms_bEnableAudioEffects = *(bool*)(module + 0x20872F5);
 	};
 
+	class qVector3 {
+	public:
+		float x;
+		float y;
+		float z;
+	};
+
 	class SimComponentHolder {
 	public:
 		void* m_pComponent;
@@ -49,4 +56,5 @@ namespace UFG {
 	}
 
 	auto GetLocalPlayer = (SimObject*(__fastcall*)())(module + 0x360930);
+	auto GetPosition = (UFG::qVector3*(__fastcall*)(UFG::qVector3*, UFG::SimObject*))(module + 0x361E70);
 }

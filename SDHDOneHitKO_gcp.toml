@@ -3,4 +3,5 @@
 
 [main]
 no_idle_grapple_damage = true		# Disables idle damage from being grappled, required for some missions to be passable!
+no_cop_tackle_damage = true		# Disables unavoidable damage from being tackled by a cop in a cutscene in Popstar Lead 1
 health_display_mode = 0			# Health HUD state, doesn't affect gameplay (0 - no health, 1 - full health, 2 - full upgraded health)
